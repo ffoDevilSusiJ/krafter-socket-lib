@@ -57,6 +57,9 @@ export interface IEventProcessorConfig {
 
 export interface IGatewayEvent {
   eventType: string;
+  serviceName?: string;
+  module?: string;
+  eventName?: string;
   userId: string;
   socketId: string;
   roomId?: string;
@@ -91,3 +94,32 @@ export interface IEventContext {
 }
 
 export type EventHandler = (context: IEventContext) => Promise<IBroadcastEvent | IBroadcastEvent[] | null>;
+
+export interface IServiceConfig {
+  serviceName: string;
+  channel: string;
+}
+
+export interface IEventRoute {
+  serviceName: string;
+  module: string;
+  eventName: string;
+}
+
+export interface ISocketServerConfig {
+  port?: number;
+  path?: string;
+  cors?: {
+    origin: string | string[];
+    credentials?: boolean;
+  };
+  pingTimeout?: number;
+  pingInterval?: number;
+}
+
+export interface IClientInfo {
+  id: string;
+  connectedAt: number;
+  status: ConnectionStatus;
+  metadata?: Record<string, unknown>;
+}

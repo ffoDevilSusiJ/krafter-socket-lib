@@ -8,7 +8,7 @@ import {
   ISessionCacheProvider,
 } from '../types';
 import { RedisPubSub } from '../redis';
-import { Logger, LogLevel, ErrorHandler } from '../utils';
+import { Logger, LogLevel, ErrorHandler, EventParser } from '../utils';
 
 export class EventProcessor {
   private redisPubSub: RedisPubSub;
@@ -60,7 +60,34 @@ export class EventProcessor {
   private async handleIncomingMessage(message: string): Promise<void> {
     try {
       const event: IGatewayEvent = JSON.parse(message);
-      this.logger.debug(`Received event: ${event.eventType}`, event);
+
+      const parsedEvent = EventParser.parseEventType(event.eventType);
+      if (!parsedEvent) {
+        const errorMsg = `Invalid event format: ${event.eventType}. Expected format: serviceName:module:name`;
+        this.logger.error(errorMsg);
+
+        // Отправляем ошибку обратно отправителю
+        const errorBroadcast: IBroadcastEvent = {
+          type: 'error',
+          recipients: [event.socketId],
+          payload: {
+            code: 'INVALID_EVENT_FORMAT',
+            message: errorMsg,
+            eventType: event.eventType,
+          },
+        };
+        await this.broadcast(errorBroadcast);
+        return;
+      }
+
+      event.serviceName = parsedEvent.serviceName;
+      event.module = parsedEvent.module;
+      event.eventName = parsedEvent.eventName;
+
+      this.logger.debug(
+        `Получено событие: ${event.eventType} (service: ${event.serviceName}, module: ${event.module}, name: ${event.eventName})`,
+        event
+      );
 
       await this.processEvent(event);
     } catch (error) {
@@ -73,7 +100,19 @@ export class EventProcessor {
     const handler = this.eventHandlers.get(event.eventType);
 
     if (!handler) {
-      this.logger.warn(`No handler registered for event type: ${event.eventType}`);
+      this.logger.warn(`Нет обработчика для события: ${event.eventType}. Отправка ошибки клиенту`);
+
+      // Отправляем ошибку клиенту
+      const errorBroadcast: IBroadcastEvent = {
+        type: 'error',
+        recipients: [event.socketId],
+        payload: {
+          code: 'NO_HANDLER',
+          message: `No handler registered for event type: ${event.eventType}`,
+          eventType: event.eventType,
+        },
+      };
+      await this.broadcast(errorBroadcast);
       return;
     }
 

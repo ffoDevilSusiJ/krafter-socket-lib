@@ -50,8 +50,6 @@ export class SocketServer {
   }
 
   private handleConnection(socket: Socket): void {
-    this.logger.info(`New client connected: ${socket.id}`);
-
     const client = new ClientConnection(socket, this.logger);
     this.clients.set(socket.id, client);
 
@@ -136,7 +134,7 @@ export class SocketServer {
       this.eventHandlers.set(eventName, new Set());
     }
     this.eventHandlers.get(eventName)!.add(handler);
-    this.logger.info(`Registered event handler for: ${eventName}`);
+    this.logger.info(`Зарегестрированно событие: ${eventName}`);
   }
 
   public emitToClient(client: ClientConnection, event: Event): void {
@@ -144,14 +142,14 @@ export class SocketServer {
   }
 
   public emitToAll(event: Event): void {
-    this.logger.debug(`Broadcasting event to all clients: ${event.eventName}`);
+    this.logger.debug(`Трансляция события события всем подключенным клиентам: ${event.eventName}`);
     this.clients.forEach((client) => {
       client.sendEvent(event);
     });
   }
 
   public emitToRoom(room: string, event: Event): void {
-    this.logger.debug(`Broadcasting event to room ${room}: ${event.eventName}`);
+    this.logger.debug(`Трансляция события всем клиентам в комнате ${room}: ${event.eventName}`);
     this.io.to(room).emit('message', event.toJSON());
   }
 
@@ -170,15 +168,13 @@ export class SocketServer {
   public async start(): Promise<void> {
     return new Promise((resolve) => {
       this.httpServer.listen(this.config.port, () => {
-        this.logger.info(`Socket.IO server started on port ${this.config.port}`);
+        this.logger.info(`Socket.IO запущен на порту ${this.config.port}`);
         resolve();
       });
     });
   }
 
   public async stop(): Promise<void> {
-    this.logger.info('Stopping Socket.IO server...');
-
     this.clients.forEach((client) => {
       client.disconnect('Server shutting down');
     });
@@ -186,7 +182,6 @@ export class SocketServer {
     return new Promise((resolve) => {
       this.io.close(() => {
         this.httpServer.close(() => {
-          this.logger.info('Socket.IO server stopped');
           resolve();
         });
       });
