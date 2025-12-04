@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Socket.IO Client Example</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        input {
+            padding: 10px;
+            margin: 5px;
+            width: 200px;
+        }
+        #log {
+            height: 300px;
+            overflow-y: auto;
+            background: #f5f5f5;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            border-bottom: 1px solid #ddd;
+        }
+        .log-entry.request {
+            color: blue;
+        }
+        .log-entry.response {
+            color: green;
+        }
+        .log-entry.event {
+            color: purple;
+        }
+        .log-entry.error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Socket.IO Client Example</h1>
+
+    <div class="section">
+        <h2>Connection</h2>
+        <div>Status: <span id="status">Disconnected</span></div>
+        <button onclick="connect()">Connect</button>
+        <button onclick="disconnect()">Disconnect</button>
+    </div>
+
+    <div class="section">
+        <h2>Username</h2>
+        <input type="text" id="username" placeholder="Enter username">
+        <button onclick="setUsername()">Set Username</button>
+    </div>
+
+    <div class="section">
+        <h2>Requests</h2>
+        <button onclick="sendEcho()">Send Echo</button>
+        <button onclick="getTime()">Get Time</button>
+        <div>
+            <input type="number" id="numA" placeholder="Number A" value="10">
+            <select id="operation">
+                <option value="add">+</option>
+                <option value="subtract">-</option>
+                <option value="multiply">*</option>
+                <option value="divide">/</option>
+            </select>
+            <input type="number" id="numB" placeholder="Number B" value="5">
+            <button onclick="calculate()">Calculate</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Chat</h2>
+        <input type="text" id="chatMessage" placeholder="Enter message">
+        <button onclick="sendChat()">Send</button>
+    </div>
+
+    <div class="section">
+        <h2>Log</h2>
+        <button onclick="clearLog()">Clear Log</button>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        let socket = null;
+
+        function generateId() {
+            return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        }
+
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${type}`;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        function updateStatus(status) {
+            document.getElementById('status').textContent = status;
+        }
+
+        function connect() {
+            if (socket) {
+                log('Already connected', 'info');
+                return;
+            }
+
+            socket = io('http://localhost:3000');
+
+            socket.on('connect', () => {
+                log('Connected to server', 'info');
+                updateStatus('Connected');
+            });
+
+            socket.on('disconnect', () => {
+                log('Disconnected from server', 'info');
+                updateStatus('Disconnected');
+                socket = null;
+            });
+
+            socket.on('message', (data) => {
+                log(`Received: ${JSON.stringify(data)}`, data.type);
+            });
+
+            socket.on('error', (error) => {
+                log(`Error: ${error.message}`, 'error');
+            });
+        }
+
+        function disconnect() {
+            if (socket) {
+                socket.disconnect();
+                socket = null;
+            }
+        }
+
+        function sendRequest(action, payload) {
+            if (!socket) {
+                log('Not connected to server', 'error');
+                return;
+            }
+
+            const request = {
+                id: generateId(),
+                type: 'request',
+                action: action,
+                payload: payload,
+                timestamp: Date.now()
+            };
+
+            log(`Sending request: ${action}`, 'request');
+            socket.emit('message', request);
+        }
+
+        function sendEvent(eventName, payload) {
+            if (!socket) {
+                log('Not connected to server', 'error');
+                return;
+            }
+
+            const event = {
+                id: generateId(),
+                type: 'event',
+                eventName: eventName,
+                payload: payload,
+                timestamp: Date.now()
+            };
+
+            log(`Sending event: ${eventName}`, 'event');
+            socket.emit('message', event);
+        }
+
+        function setUsername() {
+            const username = document.getElementById('username').value;
+            if (username) {
+                sendEvent('setUsername', username);
+            }
+        }
+
+        function sendEcho() {
+            sendRequest('echo', { message: 'Hello from client!' });
+        }
+
+        function getTime() {
+            sendRequest('getTime', {});
+        }
+
+        function calculate() {
+            const a = parseFloat(document.getElementById('numA').value);
+            const b = parseFloat(document.getElementById('numB').value);
+            const operation = document.getElementById('operation').value;
+
+            sendRequest('calculate', { operation, a, b });
+        }
+
+        function sendChat() {
+            const message = document.getElementById('chatMessage').value;
+            if (message) {
+                sendEvent('chat', message);
+                document.getElementById('chatMessage').value = '';
+            }
+        }
+
+        document.getElementById('chatMessage').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendChat();
+            }
+        });
+    </script>
+</body>
+</html>
