@@ -16,8 +16,8 @@ export class EventProcessor {
   private logger: Logger;
   private errorHandler: ErrorHandler;
   private eventHandlers: Map<string, EventHandler>;
-  private authProvider?: IAuthProvider;
-  private sessionCache?: ISessionCacheProvider;
+  private authProvider: IAuthProvider | null = null;
+  private sessionCache: ISessionCacheProvider | null = null;
   private isRunning: boolean = false;
 
   constructor(config: IEventProcessorConfig) {
@@ -169,13 +169,9 @@ export class EventProcessor {
     payload: unknown,
     excludeSocketIds?: string[]
   ): Promise<void> {
-    if (!this.authProvider || !this.sessionCache) {
-      throw new Error('Auth provider and session cache must be set');
-    }
-
     try {
-      const authorizedUsers = await this.authProvider.getAuthorizedUsersInRoom(roomId);
-      const socketIdMap = await this.sessionCache.getSocketIds(authorizedUsers, roomId);
+      const authorizedUsers = await this.authProvider!.getAuthorizedUsersInRoom(roomId);
+      const socketIdMap = await this.sessionCache!.getSocketIds(authorizedUsers, roomId);
 
       const recipients: string[] = [];
       socketIdMap.forEach((socketId, userId) => {
@@ -204,12 +200,8 @@ export class EventProcessor {
     type: string,
     payload: unknown
   ): Promise<void> {
-    if (!this.sessionCache) {
-      throw new Error('Session cache must be set');
-    }
-
     try {
-      const socketId = await this.sessionCache.getSocketId(userId, roomId);
+      const socketId = await this.sessionCache!.getSocketId(userId, roomId);
 
       if (socketId) {
         const broadcastEvent: IBroadcastEvent = {
@@ -233,26 +225,33 @@ export class EventProcessor {
     roomId: string,
     action: string
   ): Promise<boolean> {
-    if (!this.authProvider) {
-      this.logger.warn('Auth provider not set, allowing all permissions');
-      return true;
-    }
-
     try {
-      return await this.authProvider.checkPermission(userId, roomId, action);
+      return await this.authProvider!.checkPermission(userId, roomId, action);
     } catch (error) {
-      this.logger.error(`Failed to check permission for ${userId}`, error);
+      this.logger.error(`Ошибка проверки доступов для пользователя ${userId}`, error);
       return false;
     }
   }
 
   public async start(): Promise<void> {
     if (this.isRunning) {
-      this.logger.warn('Event processor is already running');
       return;
     }
 
-    this.logger.info('Starting Event Processor...');
+    // TODO: Сейчас, Auth провайдер требуется во всех сервисах обработчиках событий, возможно реализацию лучше перенести сюда, чтобы не дублировать код
+    if (!this.authProvider) {
+      throw new Error(
+        'Auth provider must be set before starting Event Processor. Call setAuthProvider() first.'
+      );
+    }
+
+    if (!this.sessionCache) {
+      throw new Error(
+        'Session cache must be set before starting Event Processor. Call setSessionCache() first.'
+      );
+    }
+
+    this.logger.info('Запуск обработчика событий...');
 
     await this.redisPubSub.subscribe(
       this.config.incomingChannel,
@@ -261,23 +260,22 @@ export class EventProcessor {
 
     this.isRunning = true;
     this.logger.info(
-      `Event Processor started. Listening on: ${this.config.incomingChannel}`
+      `Обработчик событий запущен. Слушаем канал: ${this.config.incomingChannel}`
     );
   }
 
   public async stop(): Promise<void> {
     if (!this.isRunning) {
-      this.logger.warn('Event processor is not running');
       return;
     }
 
-    this.logger.info('Stopping Event Processor...');
+    this.logger.info('Остановка обработчика события...');
 
     await this.redisPubSub.unsubscribe(this.config.incomingChannel);
     await this.redisPubSub.disconnect();
 
     this.isRunning = false;
-    this.logger.info('Event Processor stopped');
+    this.logger.info('Обработчик событий успешно остановлен');
   }
 
   public isActive(): boolean {
