@@ -1,2 +1,2 @@
-export { RedisSessionCache } from './RedisSessionCache';
-export { BaseAuthProvider, MemoryAuthProvider } from './BaseAuthProvider';
+export { RedisSessionCache } from './RedisSessionCache.js';
+export { BaseAuthProvider, MemoryAuthProvider } from './BaseAuthProvider.js';

@@ -1,1 +1,1 @@
-export { EventProcessor } from './EventProcessor';
+export { EventProcessor } from './EventProcessor.js';

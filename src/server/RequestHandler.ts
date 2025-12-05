@@ -1,5 +1,5 @@
-import { Request, Response } from '../dto';
-import { ClientConnection } from './ClientConnection';
+import { Request, Response } from '../dto/index.js';
+import { ClientConnection } from './ClientConnection.js';
 
 export type RequestHandlerFunction = (
   request: Request,

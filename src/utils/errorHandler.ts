@@ -1,5 +1,5 @@
-import { ErrorMessage } from '../dto';
-import { Logger } from './logger';
+import { ErrorMessage } from '../dto/index.js';
+import { Logger } from './logger.js';
 
 export interface IErrorHandlerConfig {
   logger?: Logger;

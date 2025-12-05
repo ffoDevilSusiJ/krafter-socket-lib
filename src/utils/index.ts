@@ -1,4 +1,4 @@
-export { MessageValidator } from './validator';
-export { Logger, LogLevel, ILoggerConfig } from './logger';
-export { ErrorHandler, IErrorHandlerConfig } from './errorHandler';
-export { EventParser } from './eventParser';
+export { MessageValidator } from './validator.js';
+export { Logger, LogLevel, ILoggerConfig } from './logger.js';
+export { ErrorHandler, IErrorHandlerConfig } from './errorHandler.js';
+export { EventParser } from './eventParser.js';

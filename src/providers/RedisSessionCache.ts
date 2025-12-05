@@ -1,6 +1,6 @@
 import Redis from 'ioredis';
-import { ISessionCacheProvider, IRedisConfig } from '../types';
-import { Logger } from '../utils';
+import { ISessionCacheProvider, IRedisConfig } from '../types/index.js';
+import { Logger } from '../utils/index.js';
 
 export class RedisSessionCache implements ISessionCacheProvider {
   private redis: Redis;

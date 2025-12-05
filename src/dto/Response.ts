@@ -1,5 +1,5 @@
-import { IResponse, MessageType } from '../types';
-import { Message } from './Message';
+import { IResponse, MessageType } from '../types/index.js';
+import { Message } from './Message.js';
 
 export class Response extends Message implements IResponse {
   public readonly type: MessageType.RESPONSE = MessageType.RESPONSE;

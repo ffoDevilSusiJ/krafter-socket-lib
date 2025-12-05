@@ -1,5 +1,5 @@
-export { Message } from './Message';
-export { Request } from './Request';
-export { Response } from './Response';
-export { Event } from './Event';
-export { ErrorMessage } from './ErrorMessage';
+export { Message } from './Message.js';
+export { Request } from './Request.js';
+export { Response } from './Response.js';
+export { Event } from './Event.js';
+export { ErrorMessage } from './ErrorMessage.js';

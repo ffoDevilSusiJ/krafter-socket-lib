@@ -1,5 +1,5 @@
-import { IRequest, MessageType } from '../types';
-import { Message } from './Message';
+import { IRequest, MessageType } from '../types/index.js';
+import { Message } from './Message.js';
 
 export class Request extends Message implements IRequest {
   public readonly type: MessageType.REQUEST = MessageType.REQUEST;

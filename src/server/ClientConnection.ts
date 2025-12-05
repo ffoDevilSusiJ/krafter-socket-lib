@@ -1,7 +1,7 @@
 import { Socket } from 'socket.io';
-import { IClientInfo, ConnectionStatus } from '../types';
-import { Request, Response, Event, ErrorMessage } from '../dto';
-import { Logger } from '../utils';
+import { IClientInfo, ConnectionStatus } from '../types/index.js';
+import { Request, Response, Event, ErrorMessage } from '../dto/index.js';
+import { Logger } from '../utils/index.js';
 
 export class ClientConnection {
   private socket: Socket;

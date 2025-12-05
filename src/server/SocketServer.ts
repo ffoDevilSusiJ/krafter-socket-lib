@@ -1,10 +1,10 @@
 import { Server, Socket } from 'socket.io';
 import { createServer, Server as HttpServer } from 'http';
-import { ISocketServerConfig, MessageType } from '../types';
-import { Request, Event } from '../dto';
-import { Logger, LogLevel, MessageValidator, ErrorHandler } from '../utils';
-import { ClientConnection } from './ClientConnection';
-import { RequestHandler, RequestHandlerFunction } from './RequestHandler';
+import { ISocketServerConfig, MessageType } from '../types/index.js';
+import { Request, Event } from '../dto/index.js';
+import { Logger, LogLevel, MessageValidator, ErrorHandler } from '../utils/index.js';
+import { ClientConnection } from './ClientConnection.js';
+import { RequestHandler, RequestHandlerFunction } from './RequestHandler.js';
 
 export class SocketServer {
   private io: Server;

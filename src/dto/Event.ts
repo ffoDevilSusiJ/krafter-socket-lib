@@ -1,5 +1,5 @@
-import { IEvent, MessageType } from '../types';
-import { Message } from './Message';
+import { IEvent, MessageType } from '../types/index.js';
+import { Message } from './Message.js';
 
 export class Event extends Message implements IEvent {
   public readonly type: MessageType.EVENT = MessageType.EVENT;

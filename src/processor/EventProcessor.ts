@@ -6,9 +6,9 @@ import {
   EventHandler,
   IAuthProvider,
   ISessionCacheProvider,
-} from '../types';
-import { RedisPubSub } from '../redis';
-import { Logger, LogLevel, ErrorHandler, EventParser } from '../utils';
+} from '../types/index.js';
+import { RedisPubSub } from '../redis/index.js';
+import { Logger, LogLevel, ErrorHandler, EventParser } from '../utils/index.js';
 
 export class EventProcessor {
   private redisPubSub: RedisPubSub;
@@ -242,12 +242,6 @@ export class EventProcessor {
     if (!this.authProvider) {
       throw new Error(
         'Auth provider must be set before starting Event Processor. Call setAuthProvider() first.'
-      );
-    }
-
-    if (!this.sessionCache) {
-      throw new Error(
-        'Session cache must be set before starting Event Processor. Call setSessionCache() first.'
       );
     }
 

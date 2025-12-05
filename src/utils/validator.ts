@@ -1,4 +1,4 @@
-import { IMessage, MessageType } from '../types';
+import { IMessage, MessageType } from '../types/index.js';
 
 export class MessageValidator {
   public static isValidMessage(data: unknown): data is IMessage {

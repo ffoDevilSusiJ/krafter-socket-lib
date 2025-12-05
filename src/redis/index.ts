@@ -1,1 +1,1 @@
-export { RedisPubSub } from './RedisPubSub';
+export { RedisPubSub } from './RedisPubSub.js';

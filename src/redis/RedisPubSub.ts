@@ -1,6 +1,6 @@
 import Redis from 'ioredis';
-import { IRedisConfig } from '../types';
-import { Logger } from '../utils';
+import { IRedisConfig } from '../types/index.js';
+import { Logger } from '../utils/index.js';
 
 export class RedisPubSub {
   private publisher: Redis;

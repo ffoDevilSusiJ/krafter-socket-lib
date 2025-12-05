@@ -1,4 +1,4 @@
-import { IMessage, MessageType } from '../types';
+import { IMessage, MessageType } from '../types/index.js';
 
 export abstract class Message implements IMessage {
   public readonly id: string;

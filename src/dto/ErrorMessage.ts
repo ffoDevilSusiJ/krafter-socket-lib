@@ -1,5 +1,5 @@
-import { IError, MessageType } from '../types';
-import { Message } from './Message';
+import { IError, MessageType } from '../types/index.js';
+import { Message } from './Message.js';
 
 export class ErrorMessage extends Message implements IError {
   public readonly type: MessageType.ERROR = MessageType.ERROR;

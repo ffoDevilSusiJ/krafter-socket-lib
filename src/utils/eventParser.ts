@@ -1,4 +1,4 @@
-import { IEventRoute } from '../types';
+import { IEventRoute } from '../types/index.js';
 
 export class EventParser {
   /**

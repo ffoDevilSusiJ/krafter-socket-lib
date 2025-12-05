@@ -1,4 +1,4 @@
-import { IAuthProvider } from '../types';
+import { IAuthProvider } from '../types/index.js';
 
 export abstract class BaseAuthProvider implements IAuthProvider {
   abstract checkPermission(
